@@ -241,10 +241,14 @@ public class Accepted implements Runnable {
         	Cursor phoneCursor = r.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, 
          		    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[] {id}, null);
         	int phoneIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        	int typeIndex = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.TYPE);
          	while (phoneCursor.moveToNext()) {
-         		num = phoneCursor.getString(phoneIndex);
-         		break;
- 	        } 
+         		int type = phoneCursor.getInt(typeIndex);
+         		if ((type == ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE) || (type == ContactsContract.CommonDataKinds.Phone.TYPE_WORK_MOBILE)) {
+	         		num = phoneCursor.getString(phoneIndex);
+	         		break;
+         		}
+ 	        }
          	phoneCursor.close();
          	
          	if (num.equals("")) {
