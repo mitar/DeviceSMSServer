@@ -2,6 +2,7 @@ package fr.galize.android;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.*;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -118,12 +119,6 @@ public class Listener implements Runnable {
 		String SENT = "SMS_SENT";
 		String DELIVERED = "SMS_DELIVERED";
 
-		PendingIntent sentPI = PendingIntent.getBroadcast(context, 0,
-				new Intent(SENT), 0);
-
-		PendingIntent deliveredPI = PendingIntent.getBroadcast(context, 0,
-				new Intent(DELIVERED), 0);
-
 		//---when the SMS has been sent---
 		context.registerReceiver(new BroadcastReceiver(){
 			@Override
@@ -200,7 +195,23 @@ public class Listener implements Runnable {
 
 		SmsManager sms = SmsManager.getDefault();
 		try {
-			sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
+			if (message.length() > 160) {
+				ArrayList<String> parts = sms.divideMessage(message);
+				ArrayList<PendingIntent> sentPIs = new ArrayList<PendingIntent>();
+				ArrayList<PendingIntent> deliveredPIs = new ArrayList<PendingIntent>();
+
+				for (int i = 0; i < deliveredPIs.size(); i++) {
+					sentPIs.add(PendingIntent.getBroadcast(context, 0, new Intent(SENT), 0));
+					deliveredPIs.add(PendingIntent.getBroadcast(context, 0, new Intent(DELIVERED), 0));
+				}
+
+				sms.sendMultipartTextMessage(phoneNumber, null, parts, sentPIs, deliveredPIs);
+			}
+			else {
+				PendingIntent sentPI = PendingIntent.getBroadcast(context, 0, new Intent(SENT), 0);
+				PendingIntent deliveredPI = PendingIntent.getBroadcast(context, 0, new Intent(DELIVERED), 0);
+				sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			Log.e("ERROR","Sending error",e);
